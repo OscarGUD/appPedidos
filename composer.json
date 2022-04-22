@@ -1,6 +1,6 @@
 {
     "name": "juandelatorre/casflow",
-    "description": "Proyecto UpTask MVC, PHP 8, SASS",
+    "description": "Proyecto appPedidos MVC, PHP 8, SASS",
     "type": "project",
     "autoload": {
         "psr-4": {
@@ -9,5 +9,8 @@
             "Model\\" : "./models",
             "Classes\\" : "./classes"
         }
+    },
+    "require": {
+        "phpmailer/phpmailer": "^6.6"
     }
 }

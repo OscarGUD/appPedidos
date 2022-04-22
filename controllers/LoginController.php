@@ -2,6 +2,7 @@
 
 namespace Controllers;
 
+use Classes\Email;
 use Model\Usuario;
 use MVC\Router;
 
@@ -10,13 +11,47 @@ class LoginController{
         $alertas = [];
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            // Instanciamos un usuario y borramos password2
+            $usuario = new Usuario($_POST);
+            unset($usuario->password2);
+            // Verificamos el usuario llene correctamente los campos
+            $alertas = $usuario->validarUsuario();
+            if(empty($alertas)){
+                // Buscamos que el usuario exista en la base de datos
+                $usuario = Usuario::where('correo', $usuario->correo);
+                // En caso de que no exista o no este confirmado le mandamos un mensaje
+                if(!$usuario || !$usuario->confirmado){
+                    Usuario::setAlerta('error', 'El usuario no exite o no esta confirmado'); 
+                } else {
+                    // Verificamos que la contraseña sea correcta
+                    if(password_verify($_POST['password'], $usuario->password)){
+                        // Inisiamos la sesion
+                        session_start();
+                        $_SESSION['id'] = $usuario->id;
+                        $_SESSION['nombre'] = $usuario->nombre;
+                        $_SESSION['apellido'] = $usuario->apellido;
+                        $_SESSION['correo'] = $usuario->correo;
+                        $_SESSION['login'] = true;
 
+                        // Redireccionamos al usuario
+                        header('location: /app');
+                    } else {
+                        Usuario::setAlerta('error', 'El password es incorrecto');
+                    }
+                }
+
+            }
         }
         
+        $alertas = Usuario::getAlertas();
         $router->render('auth/login',[
             'alertas' => $alertas,
             'titulo' => 'Login'
         ]);
+    }
+    public static function logout(){
+        $_SESSION = [];
+        header('location: /');
     }
     public static function crear(Router $router){
         $alertas = [];
@@ -44,8 +79,8 @@ class LoginController{
                     $usuario->crearToken();
 
                     // Enviar Email
-                    // $email = new Email($usuario->email, $usuario->nombre, $usuario->token);
-                    // $email->enviarConfirmacion();
+                    $mail = new Email($usuario->correo, $usuario->nombre, $usuario->token);
+                    $mail->enviarConfirmacion();
 
                     // Guardar en la base de datos
                     $resultado = $usuario->guardar();
@@ -119,8 +154,8 @@ class LoginController{
                     $usuario->guardar();
 
                     // Enviar el email
-                    // $mail = new Email($usuario->email, $usuario->nombre, $usuario->token);
-                    // $mail->enviarInstrucciones();
+                    $mail = new Email($usuario->correo, $usuario->nombre, $usuario->token);
+                    $mail->enviarInstrucciones();
 
                     Usuario::setAlerta('exito','Enviamos un correo para el reestablecimiento de su password');
                 } else {

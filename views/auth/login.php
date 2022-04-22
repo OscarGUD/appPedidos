@@ -3,13 +3,13 @@
 
 <?php include_once __DIR__ . '/../templates/alertas.php';?>
 
-<form action="/login" method="POST" class="fomulario">
+<form action="/" method="POST" class="fomulario">
     <div class="campo">
-        <label for="usuario">Usuario:</label>
+        <label for="usuario">Email:</label>
         <input 
-            type="text"
-            name="usuario"
-            placeholder="Tu usuario"
+            type="email"
+            name="correo"
+            placeholder="Tu email"
             id="usuario"
         >
     </div>
@@ -29,5 +29,5 @@
 
 <div class="acciones">
     <a href="/crear">Crea una Cuenta</a>
-    <a href="/olvide">Reestablece tu Password</a>
+    <a href="/olvide">Olvide mi Password</a>
 </div>

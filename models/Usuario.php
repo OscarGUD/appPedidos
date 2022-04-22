@@ -14,6 +14,8 @@ class Usuario extends ActiveRecord{
         $this->correo = $args['correo'] ?? '';
         $this->password = $args['password'] ?? '';
         $this->password2 = $args['password2'] ?? '';
+        $this->password_actual = $args['password_actual'] ?? '';
+        $this->password_nuevo = $args['password_nuevo'] ?? '';
         $this->confirmado = $args['confirmado'] ?? 0;
         $this->token = $args['token'] ?? '';
         $this->admin = $args['admin'] ?? 0;
@@ -63,6 +65,45 @@ class Usuario extends ActiveRecord{
             self::$alertas['error'][] = 'Los passwords no son iguales';   
         }
         return self::$alertas;
+    }
+    public function validarUsuario(){
+        if(!$this->correo){
+            self::$alertas['error'][] = 'El correo es Obligatrio';   
+        }
+        if(!filter_var($this->correo, FILTER_VALIDATE_EMAIL)){
+            self::$alertas['error'][] = 'El correo no es valido';
+        }
+        if(!$this->password){
+            self::$alertas['error'][] = 'El password es Obligatrio';   
+        }
+        return self::$alertas;
+    }
+    public function validarPerfil(){
+        if(!$this->nombre){
+            self::$alertas['error'][] = 'El nombre es obligatorio';
+        }
+        if(!$this->apellido){
+            self::$alertas['error'][] = 'El apellido es obligatorio';
+        }
+        if(!$this->correo){
+            self::$alertas['error'][] = 'El correo es obligatorio';
+        }
+        return self::$alertas;
+    }
+    public function nuevo_password(){
+        if(!$this->password_actual){
+            self::$alertas['error'][] = 'El password actual no puede ir vacio';
+        }
+        if(!$this->password_nuevo){
+            self::$alertas['error'][] = 'El password nuevo no puede ir vacio';
+        }
+        if(strlen($this->password_nuevo) < 6){
+            self::$alertas['error'][] = 'El password debe contener al menos 6 caracteres';
+        }
+        return self::$alertas;
+    }
+    public function comprobar_password(){
+        return password_verify($this->password_actual, $this->password);
     }
     public function hashPassword(){
         $this->password = password_hash($this->password, PASSWORD_BCRYPT);
